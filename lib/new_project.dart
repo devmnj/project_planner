@@ -424,7 +424,7 @@ class _UpdateProjectState extends State<UpdateProject> {
         key: _globalKey,
         bottomNavigationBar: BottomAppBar(),
         appBar: AppBar(
-          title: Text('New Project'),
+          title: Text('Update Project'),
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),

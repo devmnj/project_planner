@@ -804,6 +804,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 break;
               case 4:
                 //About
+                showAboutDialog(
+                    context: context,
+                    applicationName:
+                        "Using Project Planner you can create and manage various projects offline and Online",
+                    applicationVersion: "1.0.0",
+                    children: [
+                      Text('Developer: Manoj A.P'),
+                      Text('can be reached @ manojap@outlook.com'),
+                      Text('Web:' + 'http://manojap.github.io')
+                    ],
+                    applicationIcon: Icon(Icons.games));
+
                 break;
             }
           },

@@ -2,7 +2,19 @@
 
 Project planner - is Flutter application which let users create and manage projects. This app comes with local and cloud storage features. For the local storage it uses Hive-NoSQL and for cloud it uses the MangoDB Atlas. 
 
+<img src="Screenshot_1604941977.png" width=550 alt="Flutter app">
 
+> New UI
+
+<img src="Screenshot_1604943680.png" width=550 alt="Dismissible action button"   >
+
+>  *Sliding Action buttons*  
+
+
+
+<img src="Screenshot_1604943648.png" width=550 alt="Cloud sync" >
+
+> *Cloud Sync*
 
 Since it is a multi user app , other can change projects and sync the data back MongoDB (cloud) .It also allows to download the data separately  using `Backup from cloud` and a ready to use offline [`Import from backup`] . 
 
