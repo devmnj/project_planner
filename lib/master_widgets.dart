@@ -32,15 +32,15 @@ Widget bottomNav(BuildContext context) => Container(
           SizedBox(width: 3),
           IconButton(
             icon: Icon(Icons.verified_user, size: 45,color: Colors.teal,),
-            tooltip: 'New Project',
+            tooltip: 'New Project', onPressed: () {  },
           ),
           SizedBox(width: 3),
           IconButton(
             icon: Icon(Icons.notifications_paused, size: 45,color: Colors.teal,),
-            tooltip: 'New Project',
+            tooltip: 'New Project', onPressed: () {  },
           ),
           SizedBox(width: 3),
-          IconButton(
+          IconButton(onPressed: (){},
             icon: Icon(Icons.refresh, size: 45,color: Colors.teal,),
             tooltip: 'New Project',
           ),

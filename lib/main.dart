@@ -1,4 +1,3 @@
-import 'dart:collection';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:date_format/date_format.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,9 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:folding_cell/folding_cell/widget.dart';
 import 'package:project_planner/new_project.dart';
 import 'package:project_planner/project.dart';
-import 'package:project_planner/project.dart';
 import 'package:project_planner/settings.dart';
-import 'master_widgets.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:mongo_dart/mongo_dart.dart' as _MongoDB;
@@ -66,8 +63,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
   var _scaffoldKey = GlobalKey<ScaffoldState>();
   var _bottomNavigationKey = GlobalKey();
-  int _Page = 0;
-  bool enable_web = false;
+  int _page = 0;
+
+  // ignore: non_constant_identifier_names
+  bool enable_Web = false;
 
   @override
   void dispose() {
@@ -86,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
       projectBox = Hive.box(boxName);
       settingsBox = Hive.box<Settings>(sboxName);
       if (settingsBox.keys.toList().length > 0)
-        enable_web = settingsBox.getAt(0).webEnabled;
+        enable_Web = settingsBox.getAt(0).webEnabled;
     } on Exception catch (e) {
       // TODO
     }
@@ -438,7 +437,15 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  showAlert(BuildContext context, title, content, Function confirm) {
+  loadingAlert(BuildContext context) {
+    CoolAlert.show(
+      context: context,
+      type: CoolAlertType.loading,
+    );
+  }
+
+  showAlert(BuildContext context, title, content, Function confirm,
+      {CoolAlertType aType = CoolAlertType.warning}) {
     CoolAlert.show(
         onConfirmBtnTap: confirm,
         context: context,
@@ -471,18 +478,18 @@ class _MyHomePageState extends State<MyHomePage> {
                     height: 5,
                   ),
                   Switch(
-                    value: enable_web,
+                    value: enable_Web,
                     focusColor: Colors.indigo,
                     activeColor: Colors.indigo,
                     onChanged: (bool value) {
                       try {
                         setState(() {
-                          enable_web = false;
-                          if (value == true) enable_web = true;
+                          enable_Web = false;
+                          if (value == true) enable_Web = true;
                         });
                         if (settingsBox.keys.toList().length > 0)
                           settingsBox.clear();
-                        settingsBox.add(new Settings(enable_web));
+                        settingsBox.add(new Settings(enable_Web));
                         _scaffoldKey.currentState.showSnackBar(
                             new SnackBar(content: Text('Settings Saved')));
                       } on Exception catch (e) {
@@ -509,25 +516,29 @@ class _MyHomePageState extends State<MyHomePage> {
                             fontSize: 15, fontWeight: FontWeight.bold)),
                     color: Colors.green,
                     onPressed: () {
-                      cloudBackup().whenComplete(() {
-                        // print('Action completed' + bb.length.toString());
-                        if (bb.keys.toList().length > 0) {
-                          CoolAlert.show(
+                      try {
+                        cloudBackup().whenComplete(() {
+                          // print('Action completed' + bb.length.toString());
+                          if (bb.keys.toList().length > 0) {
+                            CoolAlert.show(
+                                context: context,
+                                type: CoolAlertType.success,
+                                title: 'Cloud Backup',
+                                text: 'Cloud Backup completed [ ' +
+                                    bb.keys.toList().length.toString() +
+                                    ' ]');
+                          } else {
+                            CoolAlert.show(
                               context: context,
-                              type: CoolAlertType.success,
+                              type: CoolAlertType.error,
                               title: 'Cloud Backup',
-                              text: 'Cloud Backup completed [ ' +
-                                  bb.keys.toList().length.toString() +
-                                  ' ]');
-                        } else {
-                          CoolAlert.show(
-                            context: context,
-                            type: CoolAlertType.error,
-                            title: 'Cloud Backup',
-                            text: 'Nothing left on Cloud ',
-                          );
-                        }
-                      });
+                              text: 'Nothing left on Cloud ',
+                            );
+                          }
+                        });
+                      } on Exception catch (e) {
+                        // TODO
+                      }
                       // if( box.asStream().length !=0){
                       //   //
                     },
@@ -785,6 +796,7 @@ class _MyHomePageState extends State<MyHomePage> {
           buttonBackgroundColor: Colors.deepOrange,
           height: 50.0,
           onTap: (index) {
+            //index=_Page;
             switch (index) {
               case 0:
                 Navigator.push(
@@ -794,20 +806,42 @@ class _MyHomePageState extends State<MyHomePage> {
                 break;
               case 1:
                 //Sync
-                syncToCloud();
+                showAlert(context, 'Sync', 'Wanna sync to the Cloud ?', () {
+                  Navigator.pop(context);
+                  syncToCloud();
+                });
+                //syncToCloud();
                 break;
               case 2:
+                showAlert(context, 'Backup', 'wanna download from Cloud ?', () {
+                  Navigator.pop(context);
+                  cloudBackup().whenComplete(() {
+                    if (bb.keys.toList().length > 0) {
+                      CoolAlert.show(
+                          context: context,
+                          type: CoolAlertType.success,
+                          title: 'Cloud Backup',
+                          text: 'Cloud Backup completed [ ' +
+                              bb.keys.toList().length.toString() +
+                              ' ]');
+                    } else {
+                      CoolAlert.show(
+                        context: context,
+                        type: CoolAlertType.error,
+                        title: 'Cloud Backup',
+                        text: 'Nothing left on Cloud ',
+                      );
+                    }
+                  });
+                });
                 //Backup from Cloud
                 break;
+
               case 3:
-                //Restore Old Backup
-                break;
-              case 4:
                 //About
                 showAboutDialog(
                     context: context,
-                    applicationName:
-                        "Using Project Planner you can create and manage various projects offline and Online",
+                    applicationName: "Project Planner MongoDB Cloud app",
                     applicationVersion: "1.0.0",
                     children: [
                       Text('Developer: Manoj A.P'),
@@ -826,7 +860,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 // Navigator.push(context,
                 //     new MaterialPageRoute(builder: (context) => (NewProject())));
                 setState(() {
-                  _Page = 0;
+                  _page = 0;
                 });
               },
               child: Icon(
@@ -838,7 +872,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 onTap: () {
                   setState(() {
                     //cloud Sync
-                    _Page = 1;
+                    _page = 1;
                   });
                 },
                 child: Icon(Icons.cloud_upload, size: 30)),
@@ -846,22 +880,22 @@ class _MyHomePageState extends State<MyHomePage> {
                 onTap: () {
                   //Back up to Cloud
                   setState(() {
-                    _Page = 2;
+                    _page = 2;
                   });
                 },
                 child: GestureDetector(
                     onTap: () {
                       //Import from the old backup
                       setState(() {
-                        _Page = 3;
+                        _page = 3;
                       });
                     },
-                    child: Icon(Icons.file_upload, size: 30))),
+                    child: Icon(Icons.cloud_download, size: 30))),
             GestureDetector(
               onTap: () {
                 //About
                 setState(() {
-                  _Page = 4;
+                  _page = 4;
                 });
               },
               child: Icon(
